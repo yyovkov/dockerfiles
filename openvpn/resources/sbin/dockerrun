@@ -1,0 +1,27 @@
+#!/bin/sh
+OVPN_CONFDIR="/etc/openvpn"
+OVPN_INSTANCE="server"
+OVPN_NATDEVICE="eth0"
+OVPN_ARGUMENTS=""
+OVPN_CRLFILE="${OVPN_CONFDIR}/keys/crl.pem"
+OVPN_CONFIG="${OVPN_CONFDIR}/${OVPN_INSTANCE}.conf"
+
+if [ ! -c /dev/net/tun ]; then
+  mkdir -p /dev/net
+  mknod /dev/net/tun c 10 200
+  chmod 600 /dev/net/tun
+fi
+
+# Set up firewall
+iptables -t nat -C POSTROUTING -s $OVPN_SERVER -o $OVPN_NATDEVICE -j MASQUERADE || \
+  iptables -t nat -A POSTROUTING -s $OVPN_SERVER -o $OVPN_NATDEVICE -j MASQUERADE
+iptables -t nat -C POSTROUTING -s "$i" -o $OVPN_NATDEVICE -j MASQUERADE || \
+  iptables -t nat -A POSTROUTING -s "$i" -o $OVPN_NATDEVICE -j MASQUERADE
+
+# Run OpenVPN
+if [ -r ${OVPN_CRLFILE} ]; then
+  echo ""
+  OVPN_ARGUMENTS="${OVPN_ARGUMENTS} --crl-verify ${OVPN_CRLFILE}"
+else
+  openvpn $OVPN_ARGUMENTS --config ${OVPN_CONFIG}
+fi

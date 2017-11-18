@@ -1,0 +1,17 @@
+# Connection to root.hubata-seals.com
+remote root.hubata-seals.com 1194
+proto udp
+dev tun 
+comp-lzo
+tls-client
+<ca>
+</ca>
+<cert>
+</cert>
+<key>
+</key>
+nobind
+persist-tun
+persist-key
+pull
+verb 3

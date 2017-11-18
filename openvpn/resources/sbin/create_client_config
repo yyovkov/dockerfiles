@@ -1,0 +1,15 @@
+#!/bin/sh
+PKIHOME="/easy-rsa/pki"
+
+# Chef if the certificate exist
+for file in ${PKIHOME}/ca.crt ${PKIHOME}/issued/${NAME}.crt ${PKIHOME}/private/${NAME}.key
+do
+    if [[ ! -r $file ]]
+    then
+        echo "ERROR: Unable to read $file!" >&2
+	exit 1
+   fi
+done
+
+# Generate Config
+/bin/sed -e "/<ca>/r ${PKIHOME}/ca.crt" -e "/<cert>/r ${PKIHOME}/issued/${NAME}.crt" -e "/<key>/r ${PKIHOME}/private/${NAME}.key" ./template_config.txt > ${NAME}.ovpn
